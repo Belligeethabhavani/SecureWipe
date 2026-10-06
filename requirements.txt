@@ -1,0 +1,6 @@
+PySide6
+reportlab
+psutil
+cryptography
+qrcode[pil]
+pillow

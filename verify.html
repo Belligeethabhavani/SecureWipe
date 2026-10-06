@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecureWipe — Verify Certificate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --danger: #f85149;
+      --grad: linear-gradient(135deg, #0550ae 0%, #1a7f64 100%);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* HERO */
+    .hero {
+      background: var(--grad);
+      padding: 60px 24px 68px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-icon {
+      font-size: 3.2rem;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: #fff;
+    }
+
+    .hero h1 span {
+      opacity: .7;
+    }
+
+    .hero p {
+      color: rgba(255, 255, 255, .75);
+      font-size: 1rem;
+      margin-top: 10px;
+      max-width: 500px;
+      margin-inline: auto;
+    }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, .15);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, .2);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 600;
+      padding: 3px 11px;
+      border-radius: 20px;
+      letter-spacing: .05em;
+    }
+
+    /* LAYOUT */
+    .container {
+      max-width: 780px;
+      margin-inline: auto;
+      padding: 0 20px;
+    }
+
+    section {
+      padding: 44px 0;
+    }
+
+    section+section {
+      border-top: 1px solid var(--border);
+    }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px;
+    }
+
+    .card-label {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card>p {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    /* FORM */
+    .field {
+      margin-top: 18px;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .lnum {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #0d1117;
+      font-size: .7rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: .73rem;
+      margin-left: auto;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag {
+      border-color: var(--accent);
+      background: rgba(88, 166, 255, .05);
+    }
+
+    .upload-zone .uz-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .upload-zone p {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .upload-zone input {
+      display: none;
+    }
+
+    .upload-zone.has-file {
+      border-color: var(--success);
+      background: rgba(63, 185, 80, .05);
+    }
+
+    .upload-zone.has-file p {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    input[type=text] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: "JetBrains Mono", monospace;
+      font-size: .78rem;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    input[type=text]:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 22px;
+      transition: background .15s, transform .1s;
+    }
+
+    .btn:hover {
+      background: #79c0ff;
+    }
+
+    .btn:active {
+      transform: scale(.99);
+    }
+
+    /* RESULT */
+    #resultSection {
+      display: none;
+    }
+
+    .result-banner {
+      border-radius: 10px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .result-banner.ok {
+      background: rgba(63, 185, 80, .1);
+      border: 1.5px solid var(--success);
+    }
+
+    .result-banner.fail {
+      background: rgba(248, 81, 73, .1);
+      border: 1.5px solid var(--danger);
+    }
+
+    .result-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .result-banner h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .result-banner p {
+      font-size: .83rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .ok h3 {
+      color: var(--success);
+    }
+
+    .fail h3 {
+      color: var(--danger);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 155px 1fr;
+      gap: 1px;
+      background: var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .dk,
+    .dv {
+      background: var(--surface);
+      padding: 9px 14px;
+      font-size: .81rem;
+    }
+
+    .dk {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .dv {
+      font-family: "JetBrains Mono", monospace;
+      word-break: break-all;
+    }
+
+    /* MATH SECTION */
+    .math-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .math-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .math-header p {
+      color: var(--muted);
+      margin-top: 5px;
+      font-size: .88rem;
+    }
+
+    .math-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 20px 22px;
+      margin-bottom: 18px;
+    }
+
+    .math-block h3 {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .math-block p {
+      font-size: .83rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .math-block p+p {
+      margin-top: 8px;
+    }
+
+    .formula {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 13px 16px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: .78rem;
+      color: #79c0ff;
+      margin: 11px 0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .threat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media(max-width:600px) {
+      .threat-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .tc h4 {
+      font-size: .8rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .tc.good h4 {
+      color: var(--success);
+    }
+
+    .tc.bad h4 {
+      color: var(--danger);
+    }
+
+    .tc p {
+      font-size: .76rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: .74rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="hero">
+    <div class="hero-icon">🛡</div>
+    <h1>Secure<span>Wipe</span><br />Certificate Verifier</h1>
+    <p>Upload the certificate PDF and paste the public key printed on it.<br />
+      We will do the rest for you <strong>zero trust, pure math.</strong></p>
+    <div class="badges">
+      <span class="badge">NIST SP 800-88</span>
+      <span class="badge">Ed25519 · RFC 8032</span>
+      <span class="badge">Web Crypto API</span>
+    </div>
+  </header>
+
+  <!-- VERIFY FORM -->
+  <section>
+    <div class="container">
+      <div class="card">
+        <div class="card-label">Step by step</div>
+        <h2>Verify a SecureWipe Certificate</h2>
+        <p> You will require the PDF certificate and the public key printed on page 1</p>
+
+        <!-- PDF upload -->
+        <div class="field">
+          <label><span class="lnum">①</span> Certificate PDF <span class="hint">The signed .pdf file from
+              SecureWipe</span></label>
+          <div class="upload-zone" id="dropZone" onclick="document.getElementById('pdfInput').click()"
+            ondragover="ev(event,'drag')" ondragleave="ev(event,'')" ondrop="dropped(event)">
+            <input type="file" id="pdfInput" accept=".pdf" onchange="fileChosen(this)" />
+            <div class="uz-icon">📄</div>
+            <p id="dropLabel">Click to choose or drag & drop the PDF here</p>
+          </div>
+        </div>
+
+        <!-- Public key -->
+        <div class="field">
+          <label><span class="lnum">②</span> Device Public Key <span class="hint">64 hex chars — printed on cert & in QR
+              code</span></label>
+          <input type="text" id="pubKey" placeholder="3ba5ee31674e00260e94dba8cac37bf0... (64 hex chars)" />
+        </div>
+
+        <button class="btn" onclick="verify()">🔐 Verify Certificate</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="resultSection">
+    <div class="container">
+      <div id="banner" class="result-banner">
+        <div class="result-icon" id="rIcon"></div>
+        <div>
+          <h3 id="rTitle"></h3>
+          <p id="rSub"></p>
+        </div>
+      </div>
+      <div class="detail-grid" id="detailGrid"></div>
+    </div>
+  </section>
+
+  <!-- MATH FOR NERDS -->
+  <section>
+    <div class="container">
+      <div class="math-header">
+        <h2>🧮 The Math Behind the Proof</h2>
+        <p>Exactly what happens behind the scenes : for the nerds.</p>
+      </div>
+
+      <div class="math-block">
+        <h3>1 · What is signed?</h3>
+        <p>SecureWipe signs the <b>entire PDF document</b> (all bytes up to the appended signature block).
+          Any modification — a character in a table, the timestamp, the MAC address, the file hash —
+          changes the SHA-256, invalidating the signature immediately.</p>
+        <div class="formula">bytes_to_sign = PDF_bytes[0 : indexOf("%%SECUREWIPE_V1_SIG_BEGIN%%")]
+          digest = SHA-256( bytes_to_sign ) # 32 bytes
+          signature = Ed25519.sign( digest, private_key ) # 64 bytes</div>
+      </div>
+
+      <div class="math-block">
+        <h3>2 · Ed25519 — Edwards-curve Digital Signature Algorithm (RFC 8032)</h3>
+        <p>Ed25519 uses the Twisted Edwards curve <em>−x² + y² = 1 − (121665/121666)x²y²</em>
+          over the prime field 𝔽<sub>p</sub> where <em>p = 2²⁵⁵ − 19</em>.
+          Security level: 128-bit. Key sizes: 32-byte private, 32-byte public.
+          Signature size: 64 bytes. Fully deterministic — no random nonce at sign time.</p>
+        <div class="formula">Public key: A = [k] · B (k = private scalar, B = base point)
+          Sign(m, k): r = H(k_R ‖ m)
+          R = [r] · B
+          S = (r + H(R ‖ A ‖ m) · k) mod ℓ
+          Signature: (R, S) where ℓ = 2²⁵² + 27742317777372353535851937790883648493
+
+          Verify: [8·S]·B == [8]·R + [8·H(R‖A‖m)]·A → ✅ or ❌</div>
+      </div>
+
+      <div class="math-block">
+        <h3>3 · Hardware-derived private key (HKDF + DPAPI)</h3>
+        <p>The private key is NOT random — it is deterministically derived from the machine's
+          hardware fingerprint using <b>HKDF-SHA256</b>. The base seed is encrypted with
+          <b>Windows DPAPI</b> (tied to the Windows user account + machine). Even if someone
+          extracts the DPAPI blob, they cannot use it on a different machine.
+        </p>
+        <div class="formula">seed = DPAPI_decrypt( device_seed.enc ) # random, machine-bound
+          hardware = machine_guid | username | mac | sid
+          private_key = HKDF-SHA256( ikm=seed, info="SecureWipe-v1|" + hardware )
+          public_key = [private_key] · B # visible on the certificate</div>
+        <p>The public key therefore <b>fingerprints the device</b>. A fresh keypair on a different
+          machine produces a visually different public key.</p>
+      </div>
+
+      <div class="math-block">
+        <h3>4 · Attack surface — what's protected and what isn't</h3>
+        <div class="threat-row" style="margin-top:10px">
+          <div class="tc good">
+            <h4>✅ Cryptographically sealed</h4>
+            <p>Editing PDF content · Swapping file hashes · Changing timestamps · Modifying device info · Double-marker
+              injection · Cutting signatures between certs</p>
+          </div>
+          <div class="tc bad">
+            <h4>⚠ Requires human trust</h4>
+            <p>Fresh keypair on a new machine (same limitation as PGP/SSH). Mitigated by: device name + MAC + Machine
+              GUID on the cert, and physically verifying the drive is empty.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="math-block">
+        <h3>5 · This verification page</h3>
+        <p>This page uses only the browser's built-in <b>Web Crypto API</b>
+          (<code>crypto.subtle</code>) — available natively in Chrome 113+, Firefox 123+, Safari 17+.
+          No JavaScript library is loaded from any CDN. Your PDF bytes never leave your device.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    SecureWipe v2.0 &nbsp;·&nbsp; NIST SP 800-88 Rev. 1 &nbsp;·&nbsp;
+    Ed25519 (RFC 8032) &nbsp;·&nbsp; HKDF-SHA256 &nbsp;·&nbsp; Windows DPAPI &nbsp;·&nbsp;
+    Verification runs entirely in your browser
+  </footer>
+
+  <script>
+    let pdfBytes = null;
+
+    // ── File handling ─────────────────────────────────────────────────────────────
+    function ev(e, cls) { e.preventDefault(); document.getElementById("dropZone").className = "upload-zone " + cls; }
+    function dropped(e) { e.preventDefault(); handleFile(e.dataTransfer.files[0]); }
+    function fileChosen(input) { if (input.files[0]) handleFile(input.files[0]); }
+
+    function handleFile(file) {
+      if (!file || !file.name.endsWith(".pdf")) {
+        alert("Please choose a .pdf file."); return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        pdfBytes = new Uint8Array(e.target.result);
+        const zone = document.getElementById("dropZone");
+        zone.className = "upload-zone has-file";
+        document.getElementById("dropLabel").textContent = "✅  " + file.name + "  (" + (file.size / 1024).toFixed(1) + " KB)";
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // ── Main verify ───────────────────────────────────────────────────────────────
+    async function verify() {
+      if (!pdfBytes) { alert("Please upload the PDF certificate first."); return; }
+
+      const pubHex = document.getElementById("pubKey").value.trim().toLowerCase();
+      if (pubHex.length !== 64) {
+        showResult(false, [`Public key must be 64 hex chars — got ${pubHex.length}`]); return;
+      }
+
+      // 1. Find our signature marker — must appear exactly once
+      const marker = new TextEncoder().encode("%%SECUREWIPE_V1_SIG_BEGIN%%\n");
+      const markerPos = findMarker(pdfBytes, marker);
+
+      if (markerPos === -1) {
+        showResult(false, ["Signature block not found — this PDF was not produced by SecureWipe."]); return;
+      }
+      // Count occurrences — must be exactly 1
+      if (countOccurrences(pdfBytes, marker) !== 1) {
+        showResult(false, ["⚠️  Multiple signature blocks detected — certificate is FORGED."]); return;
+      }
+
+      // 2. Split: PDF body = everything before the marker
+      const pdfBody = pdfBytes.slice(0, markerPos);
+
+      // 3. Extract signature (first 128 chars after marker)
+      const afterMarker = pdfBytes.slice(markerPos + marker.length);
+      const sigHex = new TextDecoder().decode(afterMarker.slice(0, 128)).trim().toLowerCase();
+
+      if (sigHex.length !== 128) {
+        showResult(false, [`Signature extraction failed — expected 128 hex chars, got ${sigHex.length}`]); return;
+      }
+
+      // 4. Hash the PDF body with SHA-256
+      const digest = await crypto.subtle.digest("SHA-256", pdfBody);
+
+      // 5. Verify Ed25519 signature
+      try {
+        const pubRaw = hexToBytes(pubHex);
+        const sigRaw = hexToBytes(sigHex);
+        const cryptoKey = await crypto.subtle.importKey(
+          "raw", pubRaw, { name: "Ed25519" }, false, ["verify"]
+        );
+        const valid = await crypto.subtle.verify({ name: "Ed25519" }, cryptoKey, sigRaw, digest);
+        showResult(valid, valid ? [] : ["Ed25519 signature does not match this PDF content — document may have been modified."]);
+      } catch (e) {
+        showResult(false, [`Crypto error: ${e.message}`]);
+      }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────────
+    function hexToBytes(hex) {
+      const b = new Uint8Array(hex.length / 2);
+      for (let i = 0; i < hex.length; i += 2) b[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+      return b;
+    }
+
+    function findMarker(haystack, needle) {
+      outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+        for (let j = 0; j < needle.length; j++)
+          if (haystack[i + j] !== needle[j]) continue outer;
+        return i;
+      }
+      return -1;
+    }
+
+    function countOccurrences(haystack, needle) {
+      let count = 0, pos = 0;
+      while (true) {
+        let found = false;
+        outer: for (let i = pos; i <= haystack.length - needle.length; i++) {
+          for (let j = 0; j < needle.length; j++)
+            if (haystack[i + j] !== needle[j]) continue outer;
+          count++; pos = i + needle.length; found = true; break;
+        }
+        if (!found) break;
+      }
+      return count;
+    }
+
+    function showResult(valid, issues) {
+      const sec = document.getElementById("resultSection");
+      sec.style.display = "block";
+      sec.scrollIntoView({ behavior: "smooth" });
+
+      const banner = document.getElementById("banner");
+      banner.className = "result-banner " + (valid ? "ok" : "fail");
+      document.getElementById("rIcon").textContent = valid ? "✅" : "❌";
+      document.getElementById("rTitle").textContent = valid
+        ? "Certificate Verified — This PDF has not been tampered with"
+        : "Verification Failed";
+      document.getElementById("rSub").textContent = valid
+        ? "The Ed25519 signature over the full PDF content is mathematically valid."
+        : issues.join(" | ");
+
+      const rows = [
+        ["Result", valid ? "✅  SIGNATURE VALID" : "❌  INVALID"],
+        ["Algorithm", "Ed25519 (RFC 8032) via Web Crypto API"],
+        ["Signed scope", "Entire PDF — any content change invalidates the signature"],
+        ["Key binding", "HKDF-SHA256(device_seed, hardware_fingerprint) — machine-bound"],
+        ["Marker check", "Exactly one %%SECUREWIPE_V1_SIG_BEGIN%% block — no injection"],
+      ];
+      document.getElementById("detailGrid").innerHTML =
+        rows.map(([k, v]) => `<div class="dk">${k}</div><div class="dv">${v}</div>`).join("");
+    }
+  </script>
+</body>
+
+</html>
